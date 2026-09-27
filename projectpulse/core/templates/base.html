@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ProjectPulse - Student Project &amp; Task Management{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <a href="{% url 'home' %}" class="brand-logo">
+      <span>PROJECTPULSE</span>
+      <span class="brand-badge">Student Platform</span>
+    </a>
+
+    <nav class="nav-links">
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+        <a href="{% url 'project_list' %}" class="nav-link">Projects</a>
+        <a href="{% url 'project_create' %}" class="nav-link" style="color: var(--primary); font-weight: 600;">+ New Project</a>
+        <span class="nav-user-greeting">
+          Hi, <strong>{{ user.username }}</strong>
+        </span>
+        <form method="post" action="{% url 'logout' %}" style="display: inline; margin: 0;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary btn-sm" title="Log out of ProjectPulse">
+            Logout
+          </button>
+        </form>
+      {% else %}
+        <a href="{% url 'home' %}" class="nav-link">Home</a>
+        <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Log In</a>
+        <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Register</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="container">
+    {% if messages %}
+      <div class="messages-container">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}
+      {% if is_home %}
+        <div style="text-align: center; padding: 4rem 1rem; max-width: 720px; margin: 0 auto;">
+          <span class="badge badge-medium" style="margin-bottom: 1rem; padding: 0.35rem 0.8rem; font-size: 0.85rem;">
+            Python &amp; Django Full-Stack Platform
+          </span>
+          <h1 style="font-size: 2.75rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem; color: #0f172a;">
+            Keep your student projects &amp; task deadlines under control.
+          </h1>
+          <p style="font-size: 1.15rem; color: var(--text-muted); margin-bottom: 2rem;">
+            Track coursework, set task priorities, automatically compute project completion percentages, and catch overdue deadlines before submission day.
+          </p>
+          <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="{% url 'register' %}" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-size: 1rem;">
+              Create Student Account
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+              Log In
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    {% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; {% now "Y" %} <strong>ProjectPulse</strong> &mdash; Student Project &amp; Task Management Platform. Built with Python &amp; Django.</p>
+  </footer>
+
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}My Projects - PROJECTPULSE{% endblock %}
+
+{% block content %}
+<div style="max-width: 950px; margin: 0 auto;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.85rem; font-weight: 700; color: var(--text-main);">My Projects</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        View, search, edit, and organize all your coursework and personal projects.
+      </p>
+    </div>
+    <a href="{% url 'project_create' %}" class="btn btn-primary">
+      + Create New Project
+    </a>
+  </div>
+
+  <!-- Search and Filter Bar -->
+  <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+    <form method="get" action="{% url 'project_list' %}" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+      <input
+        type="text"
+        name="q"
+        value="{{ query }}"
+        placeholder="Search projects by title or description..."
+        class="form-input"
+        style="flex: 2; min-width: 220px;"
+      >
+      <select name="status" class="form-select" style="flex: 1; min-width: 160px;">
+        <option value="">All Statuses</option>
+        <option value="planning" {% if status_filter == 'planning' %}selected{% endif %}>Planning</option>
+        <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+        <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+      </select>
+      <button type="submit" class="btn btn-secondary">Filter</button>
+      {% if query or status_filter %}
+        <a href="{% url 'project_list' %}" class="btn btn-secondary" style="color: var(--text-muted);">Reset</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Projects List Grid -->
+  {% if projects %}
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+      {% for project in projects %}
+        <div class="card" style="padding: 1.5rem; transition: transform 0.15s ease;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                <span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">
+                  Created: {{ project.created_at|date:"M d, Y" }}
+                </span>
+                {% if project.is_overdue %}
+                  <span class="badge badge-urgent">Overdue Project</span>
+                {% endif %}
+              </div>
+              <h2 style="font-size: 1.35rem; font-weight: 700;">
+                <a href="{% url 'project_detail' project.id %}" style="color: var(--text-main);">
+                  {{ project.title }}
+                </a>
+              </h2>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display: flex; gap: 0.5rem;">
+              <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary btn-sm">View</a>
+              <a href="{% url 'project_edit' project.id %}" class="btn btn-secondary btn-sm">Edit</a>
+              <a href="{% url 'project_delete' project.id %}" class="btn btn-secondary btn-sm" style="color: var(--danger);">Delete</a>
+            </div>
+          </div>
+
+          {% if project.description %}
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.5;">
+              {{ project.description|truncatewords:30 }}
+            </p>
+          {% endif %}
+
+          <!-- Progress Bar -->
+          <div style="margin-bottom: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+              <span>Progress ({{ project.completed_tasks_count }} of {{ project.total_tasks_count }} tasks)</span>
+              <strong>{{ project.progress_percentage }}%</strong>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: {{ project.progress_percentage }}%;"></div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+            <span>Start Date: <strong>{{ project.start_date|date:"M d, Y" }}</strong></span>
+            <span>
+              Deadline:
+              {% if project.deadline %}
+                <strong>{{ project.deadline|date:"M d, Y" }}</strong>
+              {% else %}
+                <span style="color: var(--text-muted);">None</span>
+              {% endif %}
+            </span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+      <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--text-main);">No projects found</h3>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+        {% if query or status_filter %}
+          No projects matched your search criteria. Try clearing the filter.
+        {% else %}
+          You haven't created any projects yet.
+        {% endif %}
+      </p>
+      <a href="{% url 'project_create' %}" class="btn btn-primary">+ Create New Project</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

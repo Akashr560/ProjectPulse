@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome - PROJECTPULSE{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 3rem 1rem; max-width: 750px; margin: 0 auto;">
+  <span class="badge badge-medium" style="margin-bottom: 1rem; padding: 0.35rem 0.8rem; font-size: 0.85rem;">
+    Student Project &amp; Task Management Platform
+  </span>
+  <h1 style="font-size: 2.75rem; font-weight: 800; line-height: 1.15; margin-bottom: 1rem; color: #1e293b;">
+    Keep your academic projects &amp; deadlines under control.
+  </h1>
+  <p style="font-size: 1.15rem; color: var(--text-muted); margin-bottom: 2rem;">
+    ProjectPulse helps students organize academic courses, capstone assignments, and personal projects. Track task priorities, calculate real-time completion percentages, and never miss a deadline.
+  </p>
+
+  <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 3.5rem;">
+    <a href="{% url 'register' %}" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-size: 1rem;">
+      Create Free Student Account
+    </a>
+    <a href="{% url 'login' %}" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+      Log In
+    </a>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; text-align: left;">
+    <div class="card">
+      <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--primary);">📂 Project Organization</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Categorize work into Academic, Personal, Research, or Capstone with target deadlines.
+      </p>
+    </div>
+    <div class="card">
+      <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--primary);">✅ Task Management</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Break down complex assignments into actionable tasks with priorities (Low to Urgent).
+      </p>
+    </div>
+    <div class="card">
+      <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--primary);">📊 Progress &amp; Overdue Alerts</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Automatic calculation of project completion rates and immediate flagging of overdue items.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

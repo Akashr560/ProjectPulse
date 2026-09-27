@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Project - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 520px; margin: 2rem auto;">
+  <div class="card" style="border-left: 4px solid var(--danger);">
+    <div style="margin-bottom: 1.25rem;">
+      <span class="badge badge-urgent" style="margin-bottom: 0.5rem;">Irreversible Action</span>
+      <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--danger); margin-top: 0.25rem;">
+        Delete Project Confirmation
+      </h1>
+    </div>
+
+    <p style="font-size: 0.95rem; color: #334155; margin-bottom: 1rem; line-height: 1.5;">
+      Are you sure you want to permanently delete <strong>"{{ project.title }}"</strong>?
+    </p>
+
+    <div style="background-color: #fee2e2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: #991b1b;">
+      ⚠️ <strong>Warning:</strong> Deleting this project will also cascade and delete all associated tasks. This action cannot be undone.
+    </div>
+
+    <!-- POST form required for destructive delete -->
+    <form method="post" action="{% url 'project_delete' project.id %}">
+      {% csrf_token %}
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="submit" class="btn btn-danger" style="flex: 1; padding: 0.65rem;">
+          Yes, Permanently Delete
+        </button>
+        <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,3 @@
+"""
+ProjectPulse Django Project Initialization.
+"""

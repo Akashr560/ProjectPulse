@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}New Project - PROJECTPULSE{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 1.5rem auto;">
+  <div style="margin-bottom: 1rem;">
+    <a href="{% url 'dashboard' %}" style="font-size: 0.9rem;">&larr; Back to Dashboard</a>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Create New Project</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+      Define an academic course project, capstone, or personal study milestone.
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="alert alert-error">
+          <span>Please correct the errors indicated below.</span>
+        </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label class="form-label" for="{{ form.title.id_for_label }}">Project Title</label>
+        {{ form.title }}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="{{ form.description.id_for_label }}">Description / Scope</label>
+        {{ form.description }}
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="{{ form.category.id_for_label }}">Category</label>
+          {{ form.category }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.status.id_for_label }}">Status</label>
+          {{ form.status }}
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="{{ form.start_date.id_for_label }}">Start Date</label>
+          {{ form.start_date }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.deadline.id_for_label }}">Target Deadline</label>
+          {{ form.deadline }}
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary" style="flex: 1;">Save Project</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

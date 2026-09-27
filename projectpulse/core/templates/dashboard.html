@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - PROJECTPULSE{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.85rem; font-weight: 700; color: var(--text-main);">Student Dashboard</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Real-time metrics computed directly from your projects and tasks in SQLite.
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <a href="{% url 'project_create' %}" class="btn btn-primary">+ Create Project</a>
+      <a href="{% url 'project_list' %}" class="btn btn-secondary">View All Projects</a>
+    </div>
+  </div>
+
+  <!-- Real Metrics Cards (Calculated dynamically in SQLite) -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="card" style="text-align: center; padding: 1.25rem;">
+      <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total Projects</span>
+      <h3 style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-top: 0.25rem;">{{ total_projects }}</h3>
+    </div>
+
+    <div class="card" style="text-align: center; padding: 1.25rem;">
+      <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Active Projects</span>
+      <h3 style="font-size: 2.25rem; font-weight: 800; color: var(--primary); margin-top: 0.25rem;">{{ active_projects }}</h3>
+    </div>
+
+    <div class="card" style="text-align: center; padding: 1.25rem;">
+      <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Completed Projects</span>
+      <h3 style="font-size: 2.25rem; font-weight: 800; color: var(--success); margin-top: 0.25rem;">{{ completed_projects }}</h3>
+    </div>
+
+    <div class="card" style="text-align: center; padding: 1.25rem;">
+      <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Pending Tasks</span>
+      <h3 style="font-size: 2.25rem; font-weight: 800; color: var(--warning); margin-top: 0.25rem;">{{ pending_tasks }}</h3>
+    </div>
+
+    <div class="card" style="text-align: center; padding: 1.25rem;">
+      <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Overdue Tasks</span>
+      <h3 style="font-size: 2.25rem; font-weight: 800; color: var(--danger); margin-top: 0.25rem;">{{ overdue_tasks_count }}</h3>
+    </div>
+  </div>
+
+  <!-- Overdue Tasks Alert Notice -->
+  {% if overdue_tasks %}
+    <div class="card" style="border-left: 4px solid var(--danger); background-color: #fff8f8; margin-bottom: 2rem;">
+      <h3 style="color: var(--danger); font-size: 1.05rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        ⚠️ Overdue Tasks Requiring Attention ({{ overdue_tasks_count }})
+      </h3>
+      <ul style="margin-left: 1.25rem; font-size: 0.9rem; color: #475569;">
+        {% for task in overdue_tasks %}
+          <li style="margin-bottom: 0.35rem;">
+            <strong>{{ task.title }}</strong> in <em>{{ task.project.title }}</em>
+            <span style="color: var(--danger); font-weight: 600;">(Deadline was {{ task.deadline|date:"M d, Y" }})</span>
+            &bull;
+            <a href="{% url 'project_detail' task.project.id %}" style="font-size: 0.85rem; font-weight: 600;">
+              Go to Project &rarr;
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <!-- Recent Projects Section -->
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--text-main);">My Active Projects</h2>
+      <a href="{% url 'project_list' %}" style="font-size: 0.9rem; font-weight: 600;">View All ({{ total_projects }}) &rarr;</a>
+    </div>
+
+    {% if recent_projects %}
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for project in recent_projects %}
+          <div style="padding: 1rem 1.25rem; background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span>
+                <h3 style="font-size: 1.15rem; font-weight: 700; margin-top: 0.25rem;">
+                  <a href="{% url 'project_detail' project.id %}" style="color: var(--text-main);">
+                    {{ project.title }}
+                  </a>
+                </h3>
+              </div>
+              <div style="text-align: right; font-size: 0.85rem; color: var(--text-muted);">
+                {% if project.deadline %}
+                  Deadline: <strong>{{ project.deadline|date:"M d, Y" }}</strong>
+                  {% if project.is_overdue %}
+                    <span style="color: var(--danger); font-weight: bold;">(Overdue)</span>
+                  {% endif %}
+                {% else %}
+                  <span>No deadline</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Real-time Progress Bar -->
+            <div style="margin-top: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                <span>Completion Progress: <strong>{{ project.completed_tasks_count }} of {{ project.total_tasks_count }} tasks completed</strong></span>
+                <span><strong>{{ project.progress_percentage }}%</strong></span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: {{ project.progress_percentage }}%;"></div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 2.5rem 1rem;">
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+          You haven't created any projects yet.
+        </p>
+        <a href="{% url 'project_create' %}" class="btn btn-primary">+ Create First Project</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

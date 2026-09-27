@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - PROJECTPULSE{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+    <div>
+      <h1 style="font-size: 1.85rem; font-weight: 700;">Student Dashboard</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Track and manage your ongoing academic projects &amp; tasks.</p>
+    </div>
+    <a href="{% url 'project_create' %}" class="btn btn-primary">+ Create New Project</a>
+  </div>
+
+  <!-- Summary Statistics Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="card" style="text-align: center;">
+      <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Total Projects</span>
+      <h3 style="font-size: 2rem; margin-top: 0.25rem;">{{ total_projects_count }}</h3>
+    </div>
+    <div class="card" style="text-align: center;">
+      <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Total Tasks</span>
+      <h3 style="font-size: 2rem; margin-top: 0.25rem;">{{ total_tasks_count }}</h3>
+    </div>
+    <div class="card" style="text-align: center;">
+      <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Completed Tasks</span>
+      <h3 style="font-size: 2rem; color: var(--success); margin-top: 0.25rem;">{{ completed_tasks_count }}</h3>
+    </div>
+    <div class="card" style="text-align: center;">
+      <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Overdue Tasks</span>
+      <h3 style="font-size: 2rem; color: var(--danger); margin-top: 0.25rem;">{{ overdue_tasks_count }}</h3>
+    </div>
+  </div>
+
+  <!-- Overdue Alert Notice if applicable -->
+  {% if overdue_tasks %}
+    <div class="card" style="border-left: 4px solid var(--danger); margin-bottom: 2rem;">
+      <h4 style="color: var(--danger); font-size: 1rem; margin-bottom: 0.5rem;">⚠️ Attention: You have overdue tasks!</h4>
+      <ul style="margin-left: 1.25rem; font-size: 0.9rem; color: #475569;">
+        {% for task in overdue_tasks %}
+          <li style="margin-bottom: 0.25rem;">
+            <strong>{{ task.title }}</strong> in <em>{{ task.project.title }}</em> (Deadline was {{ task.deadline|date:"M d, Y" }})
+            <a href="{% url 'project_detail' task.project.pk %}" style="margin-left: 0.5rem; font-size: 0.8rem;">View Project &rarr;</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <!-- Filter & Search Bar -->
+  <div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+    <form method="get" action="{% url 'dashboard' %}" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+      <input type="text" name="q" value="{{ search_query }}" placeholder="Search projects by title..." class="form-input" style="flex: 2; min-width: 200px;">
+      
+      <select name="category" class="form-select" style="flex: 1; min-width: 150px;">
+        <option value="">All Categories</option>
+        <option value="academic" {% if category_filter == 'academic' %}selected{% endif %}>Academic</option>
+        <option value="personal" {% if category_filter == 'personal' %}selected{% endif %}>Personal</option>
+        <option value="research" {% if category_filter == 'research' %}selected{% endif %}>Research</option>
+        <option value="capstone" {% if category_filter == 'capstone' %}selected{% endif %}>Capstone</option>
+      </select>
+
+      <select name="status" class="form-select" style="flex: 1; min-width: 150px;">
+        <option value="">All Statuses</option>
+        <option value="planning" {% if status_filter == 'planning' %}selected{% endif %}>Planning</option>
+        <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+        <option value="on_hold" {% if status_filter == 'on_hold' %}selected{% endif %}>On Hold</option>
+      </select>
+
+      <button type="submit" class="btn btn-secondary">Filter</button>
+      {% if search_query or category_filter or status_filter %}
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary" style="color: var(--text-muted);">Reset</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Projects List Grid -->
+  {% if projects %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+      {% for project in projects %}
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+              <span class="badge badge-medium">{{ project.get_category_display }}</span>
+              <span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span>
+            </div>
+            <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">
+              <a href="{% url 'project_detail' project.pk %}">{{ project.title }}</a>
+            </h3>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.4;">
+              {{ project.description|truncatewords:20|default:"No description provided." }}
+            </p>
+          </div>
+
+          <div>
+            <!-- Progress bar -->
+            <div style="margin-bottom: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                <span>Progress</span>
+                <span><strong>{{ project.completion_percentage }}%</strong> ({{ project.completed_tasks_count }}/{{ project.total_tasks_count }})</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: {{ project.completion_percentage }}%;"></div>
+              </div>
+            </div>
+
+            <!-- Footer Details & Actions -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted);">
+              <span>
+                {% if project.deadline %}
+                  Due: {{ project.deadline|date:"M d, Y" }}
+                  {% if project.is_overdue %}
+                    <span style="color: var(--danger); font-weight: bold;">(Overdue)</span>
+                  {% endif %}
+                {% else %}
+                  No deadline
+                {% endif %}
+              </span>
+              <div style="display: flex; gap: 0.5rem;">
+                <a href="{% url 'project_detail' project.pk %}" class="btn btn-secondary btn-sm">View Tasks</a>
+                <a href="{% url 'project_delete' project.pk %}" class="btn btn-secondary btn-sm" style="color: var(--danger);">Delete</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1rem;">
+      <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">No projects found</h3>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+        {% if search_query or category_filter or status_filter %}
+          No projects matched your search or filter criteria.
+        {% else %}
+          You haven't created any projects yet. Get started now!
+        {% endif %}
+      </p>
+      <a href="{% url 'project_create' %}" class="btn btn-primary">+ Create First Project</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

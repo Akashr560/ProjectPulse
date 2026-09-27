@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ensure smooth touch scrolling on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}My Projects - PROJECTPULSE{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.85rem; font-weight: 700; color: var(--text-main);">My Projects</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Manage your academic coursework, research, and personal project milestones.
+      </p>
+    </div>
+    <a href="{% url 'project_create' %}" class="btn btn-primary">
+      + Create New Project
+    </a>
+  </div>
+
+  {% if projects %}
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+      {% for project in projects %}
+        <div class="card" style="padding: 1.25rem 1.5rem; transition: transform 0.15s ease;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                <span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">
+                  Created: {{ project.created_at|date:"M d, Y" }}
+                </span>
+              </div>
+              <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">
+                <a href="{% url 'project_detail' project.id %}" style="color: var(--text-main);">
+                  {{ project.title }}
+                </a>
+              </h2>
+              {% if project.description %}
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; line-height: 1.4;">
+                  {{ project.description|truncatewords:25 }}
+                </p>
+              {% endif %}
+              <div style="display: flex; gap: 1.5rem; font-size: 0.85rem; color: #475569;">
+                <span><strong>Start Date:</strong> {{ project.start_date|date:"M d, Y" }}</span>
+                <span>
+                  <strong>Deadline:</strong>
+                  {% if project.deadline %}
+                    {{ project.deadline|date:"M d, Y" }}
+                  {% else %}
+                    <span style="color: var(--text-muted);">No deadline</span>
+                  {% endif %}
+                </span>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display: flex; flex-direction: column; gap: 0.4rem; min-width: 110px;">
+              <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary btn-sm" style="text-align: center;">
+                View Details
+              </a>
+              <a href="{% url 'project_edit' project.id %}" class="btn btn-secondary btn-sm" style="text-align: center;">
+                Edit
+              </a>
+              <a href="{% url 'project_delete' project.id %}" class="btn btn-secondary btn-sm" style="text-align: center; color: var(--danger);">
+                Delete
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+      <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--text-main);">No projects created yet</h3>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+        Get started by adding your first project to track tasks and deadlines.
+      </p>
+      <a href="{% url 'project_create' %}" class="btn btn-primary">
+        + Create Your First Project
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} - PROJECTPULSE{% endblock %}
+
+{% block content %}
+<div style="max-width: 850px; margin: 0 auto;">
+  <!-- Breadcrumb -->
+  <div style="margin-bottom: 1rem;">
+    <a href="{% url 'project_list' %}" style="font-size: 0.9rem;">&larr; Back to Projects</a>
+  </div>
+
+  <!-- Main Project Detail Card -->
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">
+            Created on {{ project.created_at|date:"M d, Y" }} &bull; Updated {{ project.updated_at|timesince }} ago
+          </span>
+        </div>
+        <h1 style="font-size: 2rem; font-weight: 700; color: var(--text-main);">
+          {{ project.title }}
+        </h1>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'project_edit' project.id %}" class="btn btn-secondary btn-sm">
+          ✏️ Edit Project
+        </a>
+        <a href="{% url 'project_delete' project.id %}" class="btn btn-secondary btn-sm" style="color: var(--danger);">
+          🗑️ Delete Project
+        </a>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div style="margin-top: 1rem; margin-bottom: 1.5rem;">
+      <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
+        Description &amp; Scope
+      </h3>
+      {% if project.description %}
+        <p style="color: #334155; line-height: 1.6; font-size: 0.95rem; white-space: pre-line;">
+          {{ project.description }}
+        </p>
+      {% else %}
+        <p style="color: var(--text-muted); font-style: italic; font-size: 0.9rem;">
+          No description provided for this project.
+        </p>
+      {% endif %}
+    </div>
+
+    <!-- Metadata Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+      <div>
+        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Owner</span>
+        <strong style="font-size: 0.95rem;">{{ project.owner.username }}</strong>
+      </div>
+      <div>
+        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Start Date</span>
+        <strong style="font-size: 0.95rem;">{{ project.start_date|date:"M d, Y" }}</strong>
+      </div>
+      <div>
+        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Target Deadline</span>
+        <strong style="font-size: 0.95rem;">
+          {% if project.deadline %}
+            {{ project.deadline|date:"M d, Y" }}
+          {% else %}
+            <span style="color: var(--text-muted);">None set</span>
+          {% endif %}
+        </strong>
+      </div>
+      <div>
+        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Total Tasks</span>
+        <strong style="font-size: 0.95rem;">{{ tasks.count }} task{{ tasks.count|pluralize }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tasks Section -->
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">
+        Tasks ({{ tasks.count }})
+      </h2>
+    </div>
+
+    {% if tasks %}
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        {% for task in tasks %}
+          <div style="padding: 0.85rem 1rem; background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.25rem;">
+                <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+                <span class="badge badge-{{ task.status }}">{{ task.get_status_display }}</span>
+              </div>
+              <strong style="font-size: 0.95rem; color: var(--text-main);">{{ task.title }}</strong>
+              {% if task.deadline %}
+                <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.75rem;">
+                  Due: {{ task.deadline|date:"M d, Y" }}
+                </span>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1.5rem 0;">
+        No tasks have been added to this project yet.
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
